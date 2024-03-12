@@ -13,9 +13,9 @@ Changes:
 
 Fixes:
 
-* Fixed typo plugin display name of Korg filters.
+* Fixed typo in plugin display name of Korg filters.
 * Updated deprecated DPF param flag enum value in plugin sources.
-* Update signatures in FAUST source code comment.
+* Updated signatures in FAUST source code comment.
 * Removed debugging output to stderr.
 * Corrected LV2 plugin category for korg35hpf.
 
