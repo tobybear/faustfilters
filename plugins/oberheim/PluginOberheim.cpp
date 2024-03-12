@@ -102,7 +102,7 @@ void PluginOberheim::initParameter(uint32_t index, Parameter& parameter) {
     parameter.ranges.min = range->min;
     parameter.ranges.max = range->max;
     parameter.ranges.def = range->init;
-    parameter.hints = kParameterIsAutomable;
+    parameter.hints = kParameterIsAutomatable;
 
     if (flt->parameter_is_boolean(index))
         parameter.hints |= kParameterIsBoolean;
