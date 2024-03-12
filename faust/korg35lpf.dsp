@@ -30,7 +30,7 @@ import("stdfaust.lib");
 // #### Usage
 //
 // ```
-// _ : korg35LPF(normFreq,Q) : _
+// _ : korg35LPF(freq, Q) : _
 // ```
 //
 // Where:

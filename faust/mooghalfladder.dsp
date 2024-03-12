@@ -25,7 +25,7 @@ import("stdfaust.lib");
 // #### Usage
 //
 // ```
-// _ : moogHalfLadder(freq,Q) : _
+// _ : moogHalfLadder(freq, Q) : _
 // ```
 //
 // Where:

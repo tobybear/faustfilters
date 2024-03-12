@@ -27,7 +27,7 @@ import("stdfaust.lib");
 // #### Usage
 //
 // ```
-// _ : diodeLadder(normFreq,Q) : _
+// _ : diodeLadder(freq, Q) : _
 // ```
 //
 // Where:

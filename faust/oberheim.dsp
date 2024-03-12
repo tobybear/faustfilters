@@ -24,7 +24,7 @@ import("stdfaust.lib");
 // #### Usage
 //
 // ```
-// _ : oberheim(normFreq,Q) : _,_,_,_
+// _ : oberheim(freq, Q) : _,_,_,_
 // ```
 //
 // Where:
