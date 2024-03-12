@@ -102,21 +102,9 @@ FAUSTPP_BEGIN_NAMESPACE
 FAUSTPP_END_NAMESPACE
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <math.h>
 FAUSTPP_BEGIN_NAMESPACE
-
-static float mydsp_faustpower2_f(float value) {
-	return (value * value);
-}
-static float mydsp_faustpower10_f(float value) {
-	return (((((((((value * value) * value) * value) * value) * value) * value) * value) * value) * value);
-}
-static float mydsp_faustpower3_f(float value) {
-	return ((value * value) * value);
-}
-static float mydsp_faustpower4_f(float value) {
-	return (((value * value) * value) * value);
-}
 
 #ifndef FAUSTCLASS 
 #define FAUSTCLASS mydsp
@@ -127,14 +115,32 @@ static float mydsp_faustpower4_f(float value) {
 #define exp10 __exp10
 #endif
 
+#if defined(_WIN32)
+#define RESTRICT __restrict
+#else
+#define RESTRICT __restrict__
+#endif
+
+static float mydsp_faustpower2_f(float value) {
+	return value * value;
+}
+static float mydsp_faustpower4_f(float value) {
+	return value * value * value * value;
+}
+static float mydsp_faustpower3_f(float value) {
+	return value * value * value;
+}
+
 class mydsp : public dsp {
 	
  FAUSTPP_PRIVATE:
 	
 	int fSampleRate;
-	float fConst0;
+	float fConst1;
+	float fConst2;
 	FAUSTFLOAT fHslider0;
 	float fRec5[2];
+	float fConst3;
 	FAUSTFLOAT fHslider1;
 	float fRec1[2];
 	float fRec2[2];
@@ -142,11 +148,13 @@ class mydsp : public dsp {
 	float fRec4[2];
 	
  public:
-	
+	mydsp() {}
+
 	void metadata(Meta* m) { 
 		m->declare("../../faust/diodeladder.dsp/diodeLadder:author", "Eric Tarr");
 		m->declare("../../faust/diodeladder.dsp/diodeLadder:license", "MIT-style STK-4.3 license");
 		m->declare("author", "Christopher Arndt");
+		m->declare("compile_options", "-a /home/chris/tmp/tmp7hoz0_gh.cpp -lang cpp -ct 1 -es 1 -mcd 16 -mdd 1024 -mdy 33 -single -ftz 0");
 		m->declare("description", "FAUST Diode Ladder 24 dB LPF");
 		m->declare("filename", "diodeladder.dsp");
 		m->declare("license", "MIT-style STK-4.3 license");
@@ -154,14 +162,16 @@ class mydsp : public dsp {
 		m->declare("maths.lib/copyright", "GRAME");
 		m->declare("maths.lib/license", "LGPL with exception");
 		m->declare("maths.lib/name", "Faust Math Library");
-		m->declare("maths.lib/version", "2.3");
+		m->declare("maths.lib/version", "2.7.0");
+		m->declare("misceffects.lib/cubicnl:author", "Julius O. Smith III");
+		m->declare("misceffects.lib/cubicnl:license", "STK-4.3");
 		m->declare("misceffects.lib/name", "Misc Effects Library");
-		m->declare("misceffects.lib/version", "2.0");
+		m->declare("misceffects.lib/version", "2.4.0");
 		m->declare("name", "DiodeLadder");
 		m->declare("platform.lib/name", "Generic Platform Library");
-		m->declare("platform.lib/version", "0.1");
+		m->declare("platform.lib/version", "1.3.0");
 		m->declare("signals.lib/name", "Faust Signal Routing Library");
-		m->declare("signals.lib/version", "0.0");
+		m->declare("signals.lib/version", "1.5.0");
 	}
 
 	FAUSTPP_VIRTUAL int getNumInputs() {
@@ -170,62 +180,37 @@ class mydsp : public dsp {
 	FAUSTPP_VIRTUAL int getNumOutputs() {
 		return 1;
 	}
-	FAUSTPP_VIRTUAL int getInputRate(int channel) {
-		int rate;
-		switch ((channel)) {
-			case 0: {
-				rate = 1;
-				break;
-			}
-			default: {
-				rate = -1;
-				break;
-			}
-		}
-		return rate;
-	}
-	FAUSTPP_VIRTUAL int getOutputRate(int channel) {
-		int rate;
-		switch ((channel)) {
-			case 0: {
-				rate = 1;
-				break;
-			}
-			default: {
-				rate = -1;
-				break;
-			}
-		}
-		return rate;
-	}
 	
 	static void classInit(int sample_rate) {
 	}
 	
 	FAUSTPP_VIRTUAL void instanceConstants(int sample_rate) {
 		fSampleRate = sample_rate;
-		fConst0 = (3.14159274f / std::min<float>(192000.0f, std::max<float>(1.0f, float(fSampleRate))));
+		float fConst0 = std::min<float>(1.92e+05f, std::max<float>(1.0f, float(fSampleRate)));
+		fConst1 = 44.1f / fConst0;
+		fConst2 = 1.0f - fConst1;
+		fConst3 = 3.1415927f / fConst0;
 	}
 	
 	FAUSTPP_VIRTUAL void instanceResetUserInterface() {
-		fHslider0 = FAUSTFLOAT(20000.0f);
+		fHslider0 = FAUSTFLOAT(2e+04f);
 		fHslider1 = FAUSTFLOAT(1.0f);
 	}
 	
 	FAUSTPP_VIRTUAL void instanceClear() {
-		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
+		for (int l0 = 0; l0 < 2; l0 = l0 + 1) {
 			fRec5[l0] = 0.0f;
 		}
-		for (int l1 = 0; (l1 < 2); l1 = (l1 + 1)) {
+		for (int l1 = 0; l1 < 2; l1 = l1 + 1) {
 			fRec1[l1] = 0.0f;
 		}
-		for (int l2 = 0; (l2 < 2); l2 = (l2 + 1)) {
+		for (int l2 = 0; l2 < 2; l2 = l2 + 1) {
 			fRec2[l2] = 0.0f;
 		}
-		for (int l3 = 0; (l3 < 2); l3 = (l3 + 1)) {
+		for (int l3 = 0; l3 < 2; l3 = l3 + 1) {
 			fRec3[l3] = 0.0f;
 		}
-		for (int l4 = 0; (l4 < 2); l4 = (l4 + 1)) {
+		for (int l4 = 0; l4 < 2; l4 = l4 + 1) {
 			fRec4[l4] = 0.0f;
 		}
 	}
@@ -234,6 +219,7 @@ class mydsp : public dsp {
 		classInit(sample_rate);
 		instanceInit(sample_rate);
 	}
+	
 	FAUSTPP_VIRTUAL void instanceInit(int sample_rate) {
 		instanceConstants(sample_rate);
 		instanceResetUserInterface();
@@ -256,49 +242,49 @@ class mydsp : public dsp {
 		ui_interface->declare(&fHslider0, "style", "knob");
 		ui_interface->declare(&fHslider0, "symbol", "cutoff");
 		ui_interface->declare(&fHslider0, "unit", "hz");
-		ui_interface->addHorizontalSlider("Cutoff frequency", &fHslider0, 20000.0f, 20.0f, 20000.0f, 0.100000001f);
+		ui_interface->addHorizontalSlider("Cutoff frequency", &fHslider0, FAUSTFLOAT(2e+04f), FAUSTFLOAT(2e+01f), FAUSTFLOAT(2e+04f), FAUSTFLOAT(0.1f));
 		ui_interface->declare(&fHslider1, "1", "");
 		ui_interface->declare(&fHslider1, "abbrev", "q");
 		ui_interface->declare(&fHslider1, "style", "knob");
 		ui_interface->declare(&fHslider1, "symbol", "q");
-		ui_interface->addHorizontalSlider("Q", &fHslider1, 1.0f, 0.707199991f, 25.0f, 0.00999999978f);
+		ui_interface->addHorizontalSlider("Q", &fHslider1, FAUSTFLOAT(1.0f), FAUSTFLOAT(0.7072f), FAUSTFLOAT(25.0f), FAUSTFLOAT(0.01f));
 		ui_interface->closeBox();
 	}
 	
-	FAUSTPP_VIRTUAL void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) {
+	FAUSTPP_VIRTUAL void compute(int count, FAUSTFLOAT** RESTRICT inputs, FAUSTFLOAT** RESTRICT outputs) {
 		FAUSTFLOAT* input0 = inputs[0];
 		FAUSTFLOAT* output0 = outputs[0];
-		float fSlow0 = (0.00100000005f * float(fHslider0));
-		float fSlow1 = (float(fHslider1) + -0.707000017f);
-		float fSlow2 = (0.00514551532f * fSlow1);
-		for (int i = 0; (i < count); i = (i + 1)) {
-			fRec5[0] = (fSlow0 + (0.999000013f * fRec5[1]));
-			float fTemp0 = std::tan((fConst0 * fRec5[0]));
-			float fTemp1 = std::max<float>(-1.0f, std::min<float>(1.0f, (100.0f * float(input0[i]))));
-			float fTemp2 = (17.0f - (9.69999981f * mydsp_faustpower10_f((0.0f - (0.333333343f * (1.0f - (std::log10(fRec5[0]) + -0.30103001f)))))));
-			float fTemp3 = (fTemp0 + 1.0f);
-			float fTemp4 = ((0.5f * ((fRec1[1] * fTemp0) / fTemp3)) + fRec2[1]);
-			float fTemp5 = ((fTemp0 * (1.0f - (0.25f * (fTemp0 / fTemp3)))) + 1.0f);
-			float fTemp6 = ((fTemp0 * fTemp4) / fTemp5);
-			float fTemp7 = (0.5f * fTemp6);
-			float fTemp8 = (fTemp7 + fRec3[1]);
-			float fTemp9 = ((fTemp0 * (1.0f - (0.25f * (fTemp0 / fTemp5)))) + 1.0f);
-			float fTemp10 = ((fTemp0 * fTemp8) / fTemp9);
-			float fTemp11 = (fTemp10 + fRec4[1]);
-			float fTemp12 = (fTemp5 * fTemp9);
-			float fTemp13 = ((fTemp0 * (1.0f - (0.5f * (fTemp0 / fTemp9)))) + 1.0f);
-			float fTemp14 = mydsp_faustpower2_f(fTemp0);
-			float fTemp15 = (fTemp3 * fTemp5);
-			float fTemp16 = ((fTemp0 * ((((((1.5f * (fTemp1 * (1.0f - (0.333333343f * mydsp_faustpower2_f(fTemp1))))) + (fSlow1 * ((fTemp2 * (((0.0f - ((0.0205820613f * fTemp6) + (0.0411641225f * fRec1[1]))) - (0.0205820613f * fTemp10)) - (0.00514551532f * ((mydsp_faustpower3_f(fTemp0) * fTemp11) / (fTemp12 * fTemp13))))) / fTemp3))) * ((0.5f * (fTemp14 / (fTemp9 * fTemp13))) + 1.0f)) / ((fSlow2 * ((mydsp_faustpower4_f(fTemp0) * fTemp2) / ((fTemp15 * fTemp9) * fTemp13))) + 1.0f)) + ((fTemp8 + (0.5f * ((fTemp0 * fTemp11) / fTemp13))) / fTemp9)) - fRec4[1])) / fTemp3);
-			float fTemp17 = ((fTemp0 * ((0.5f * (((fRec4[1] + fTemp16) * ((0.25f * (fTemp14 / fTemp12)) + 1.0f)) + ((fTemp4 + (0.5f * fTemp10)) / fTemp5))) - fRec3[1])) / fTemp3);
-			float fTemp18 = ((fTemp0 * ((0.5f * (((fRec3[1] + fTemp17) * ((0.25f * (fTemp14 / fTemp15)) + 1.0f)) + ((fRec1[1] + fTemp7) / fTemp3))) - fRec2[1])) / fTemp3);
-			float fTemp19 = ((fTemp0 * ((0.5f * (fRec2[1] + fTemp18)) - fRec1[1])) / fTemp3);
-			float fRec0 = (fRec1[1] + fTemp19);
-			fRec1[0] = (fRec1[1] + (2.0f * fTemp19));
-			fRec2[0] = (fRec2[1] + (2.0f * fTemp18));
-			fRec3[0] = (fRec3[1] + (2.0f * fTemp17));
-			fRec4[0] = (fRec4[1] + (2.0f * fTemp16));
-			output0[i] = FAUSTFLOAT(fRec0);
+		float fSlow0 = fConst1 * float(fHslider0);
+		float fSlow1 = float(fHslider1) + -0.707f;
+		float fSlow2 = 0.0051455153f * fSlow1;
+		for (int i0 = 0; i0 < count; i0 = i0 + 1) {
+			fRec5[0] = fSlow0 + fConst2 * fRec5[1];
+			float fTemp0 = std::tan(fConst3 * fRec5[0]);
+			float fTemp1 = fTemp0 + 1.0f;
+			float fTemp2 = fTemp0 * (1.0f - 0.25f * (fTemp0 / fTemp1)) + 1.0f;
+			float fTemp3 = 0.5f * (fRec1[1] * fTemp0 / fTemp1) + fRec2[1];
+			float fTemp4 = fTemp0 * fTemp3 / fTemp2;
+			float fTemp5 = 0.5f * fTemp4;
+			float fTemp6 = fTemp1 * fTemp2;
+			float fTemp7 = mydsp_faustpower2_f(fTemp0);
+			float fTemp8 = fTemp0 * (1.0f - 0.25f * (fTemp0 / fTemp2)) + 1.0f;
+			float fTemp9 = fTemp5 + fRec3[1];
+			float fTemp10 = fTemp0 * fTemp9 / fTemp8;
+			float fTemp11 = fTemp2 * fTemp8;
+			float fTemp12 = fTemp0 * (1.0f - 0.5f * (fTemp0 / fTemp8)) + 1.0f;
+			float fTemp13 = fTemp10 + fRec4[1];
+			float fTemp14 = 17.0f - 9.7f * std::pow(-(0.33333334f * (1.0f - (std::log10(fRec5[0]) + -0.30103f))), 1e+01f);
+			float fTemp15 = std::max<float>(-1.0f, std::min<float>(1.0f, 1e+02f * float(input0[i0])));
+			float fTemp16 = fTemp0 * ((1.5f * fTemp15 * (1.0f - 0.33333334f * mydsp_faustpower2_f(fTemp15)) - fSlow1 * (fTemp14 * (0.041164123f * fRec1[1] + 0.020582061f * fTemp4 + 0.020582061f * fTemp10 + 0.0051455153f * (mydsp_faustpower3_f(fTemp0) * fTemp13 / (fTemp11 * fTemp12))) / fTemp1)) * (0.5f * (fTemp7 / (fTemp8 * fTemp12)) + 1.0f) / (fSlow2 * (mydsp_faustpower4_f(fTemp0) * fTemp14 / (fTemp6 * fTemp8 * fTemp12)) + 1.0f) + (fTemp9 + 0.5f * (fTemp0 * fTemp13 / fTemp12)) / fTemp8 - fRec4[1]) / fTemp1;
+			float fTemp17 = fTemp0 * (0.5f * ((fRec4[1] + fTemp16) * (0.25f * (fTemp7 / fTemp11) + 1.0f) + (fTemp3 + 0.5f * fTemp10) / fTemp2) - fRec3[1]) / fTemp1;
+			float fTemp18 = fTemp0 * (0.5f * ((fRec3[1] + fTemp17) * (0.25f * (fTemp7 / fTemp6) + 1.0f) + (fRec1[1] + fTemp5) / fTemp1) - fRec2[1]) / fTemp1;
+			float fTemp19 = fTemp0 * (0.5f * (fRec2[1] + fTemp18) - fRec1[1]) / fTemp1;
+			float fRec0 = fRec1[1] + fTemp19;
+			fRec1[0] = fRec1[1] + 2.0f * fTemp19;
+			fRec2[0] = fRec2[1] + 2.0f * fTemp18;
+			fRec3[0] = fRec3[1] + 2.0f * fTemp17;
+			fRec4[0] = fRec4[1] + 2.0f * fTemp16;
+			output0[i0] = FAUSTFLOAT(fRec0);
 			fRec5[1] = fRec5[0];
 			fRec1[1] = fRec1[0];
 			fRec2[1] = fRec2[0];
@@ -436,12 +422,12 @@ const DiodeLadder::ParameterRange *DiodeLadder::parameter_range(unsigned index) 
     switch (index) {
     
     case 0: {
-        static const ParameterRange range = { 20000, 20, 20000 };
+        static const ParameterRange range = { 20000.0, 20.0, 20000.0 };
         return &range;
     }
     
     case 1: {
-        static const ParameterRange range = { 1, 0.70719999, 25 };
+        static const ParameterRange range = { 1.0, 0.7072, 25.0 };
         return &range;
     }
     
@@ -551,7 +537,6 @@ void DiodeLadder::set_q(float value) noexcept
     mydsp &dsp = static_cast<mydsp &>(*fDsp);
     dsp.fHslider1 = value;
 }
-
 
 
 
