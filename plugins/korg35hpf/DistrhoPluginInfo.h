@@ -28,7 +28,7 @@
 #define DISTRHO_PLUGIN_INFO_H
 
 #define DISTRHO_PLUGIN_BRAND "chrisarndt.de"
-#define DISTRHO_PLUGIN_NAME  "Korg 25 HPF"
+#define DISTRHO_PLUGIN_NAME  "Korg 35 HPF"
 #define DISTRHO_PLUGIN_URI   "https://chrisarndt.de/plugins/faustfilters#korg35hpf"
 #define DISTRHO_PLUGIN_CLAP_ID "de.chrisarndt.plugins.faustfilters#korg35hpf"
 
