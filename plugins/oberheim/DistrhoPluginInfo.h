@@ -30,6 +30,7 @@
 #define DISTRHO_PLUGIN_BRAND "chrisarndt.de"
 #define DISTRHO_PLUGIN_NAME  "Oberheim Multi-Mode Filter"
 #define DISTRHO_PLUGIN_URI   "https://chrisarndt.de/plugins/faustfilters#oberheim"
+#define DISTRHO_PLUGIN_CLAP_ID "de.chrisarndt.plugins.faustfilters#oberheim"
 
 #define DISTRHO_PLUGIN_HAS_UI        0
 #define DISTRHO_UI_USE_NANOVG        0
@@ -45,5 +46,7 @@
 // Most hosts will only recognize the first (alphabetically) category :(
 //#define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:BandpassPlugin, lv2:BandstopPlugin, lv2:HighpassPlugin, lv2:LowpassPlugin"
 #define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:LowpassPlugin"
+#define DISTRHO_PLUGIN_VST3_CATEGORIES "Fx|Filter|Mono"
+#define DISTRHO_PLUGIN_CLAP_FEATURES "audio-effect", "filter", "mono"
 
 #endif // DISTRHO_PLUGIN_INFO_H

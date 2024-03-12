@@ -12,6 +12,8 @@ otherwise. They all have two (automatable) parameters:
 * Cutoff / center frequency in Hertz (`20.0 - 20,000.0`)
 * Q factor (range varies)
 
+The plugins depends on the host to provide a generic UI to control parameters.
+
 
 ### Diode Ladder
 
@@ -54,9 +56,11 @@ This filter has four outputs:
 
 All plugins in this collection come in the following plug-in formats:
 
+* CLAP
 * LADSPA
 * LV2
 * VST2
+* VST3
 
 
 ## Compiling
@@ -77,17 +81,39 @@ the following command:
 
     make install
 
-The makfiles support the usual `PREFIX` and `DESTDIR` variables to change the
+The makefiles support the usual `PREFIX` and `DESTDIR` variables to change the
 installation prefix and set an installation root directory (defaulty: empty).
 `PREFIX` defaults to `/usr/local`, but on macOS and Windows it is not used,
 since the system-wide installation directories for plugins are fixed.
 
-There is also an `install-user` target, to install the binaries in the proper
-locations under the current user's home directory.
+Use make's `-n` option to see where the plugins would be installed without
+actually installing them.
 
-    make -n install-user
+You can also set the installation directory for each plugin format with a
+dedicated makefile variable.
 
-shows you where the files would get installed, without actually doing so.
+* CLAP: `CLAP_DIR` (`<prefix>/lib/clap`)
+* LADSPA: `LADSPA_DIR` (`<prefix>/lib/ladspa`)
+* LV2: `LV2_DIR` (`<prefix>/lib/lv2`)
+* VST2: `VST2_DIR` (`<prefix>/lib/vst`)
+* VST2: `VST3_DIR` (`<prefix>/lib/vst3`)
+
+Example: `make DESTDIR=/tmp/build-root VST_DIR=/usr/lib/lxvst install`
+
+To install the plugins only for your current user account, run
+`make install-user`.
+
+Again, you can also set the installation directory for each plugin format with
+a dedicated makefile variable.
+
+* CLAP: `USER_CLAP_DIR` (`$HOME/.clap`)
+* LADSPA: `USER_LADSPA_DIR` (`$HOME/.ladspa`)
+* LV2: `USER_LV2_DIR` (`$HOME/.lv2`)
+* VST2: `USER_VST2_DIR` (`$HOME/.vst`)
+* VST3: `USER_VST3_DIR` (`$HOME/.vst3`)
+
+*Note: The given default values for all of the above listed environment
+variables differ depending on the target OS.*
 
 
 ## Prerequisites
@@ -102,12 +128,12 @@ shows you where the files would get installed, without actually doing so.
 
 * The [faustpp] pre-processor (optional)
 
-The [LV2], [LADSPA] and [VST2] (vestige) headers are included in the [DPF]
-framework, which is integrated as a Git sub-module. These need not be
+The [CLAP], [LV2], [LADSPA], [VST]2 (vestige) and VST3 headers are included in
+the [DPF] framework, which is integrated as a Git sub-module. These need not be
 installed separately to build the software in the respective plug-in formats.
 
-`faustpp` is only needed to re-generate C++ source and headers files if
-the FAUST DSP source files in the `faust` directory are changed.
+`faustpp` and FAUST are only needed to re-generate C++ source and headers files
+if the FAUST DSP source files in the `faust` directory are changed.
 
 
 ## Author
@@ -128,6 +154,7 @@ with the [cookiecutter-dpf-effect] project template (with additional
 customization).
 
 
+[CLAP]: https://cleveraudio.org/
 [cookiecutter-dpf-effect]: https://github.com/SpotlightKid/cookiecutter-dpf-effect
 [DPF]: https://github.com/DISTRHO/DPF
 [FAUST]: https://faust.grame.fr/
@@ -136,4 +163,4 @@ customization).
 [LV2]: http://lv2plug.in/
 [pkgconf]: https://github.com/pkgconf/pkgconf
 [poly_filters]: https://github.com/polyeffects/poly_filters.git
-[VST2]: https://en.wikipedia.org/wiki/Virtual_Studio_Technology
+[VST]: https://en.wikipedia.org/wiki/Virtual_Studio_Technology

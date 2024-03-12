@@ -30,6 +30,7 @@
 #define DISTRHO_PLUGIN_BRAND "chrisarndt.de"
 #define DISTRHO_PLUGIN_NAME  "Korg 25 HPF"
 #define DISTRHO_PLUGIN_URI   "https://chrisarndt.de/plugins/faustfilters#korg35hpf"
+#define DISTRHO_PLUGIN_CLAP_ID "de.chrisarndt.plugins.faustfilters#korg35hpf"
 
 #define DISTRHO_PLUGIN_HAS_UI        0
 #define DISTRHO_UI_USE_NANOVG        0
@@ -43,5 +44,7 @@
 #define DISTRHO_PLUGIN_WANT_MIDI_OUTPUT 0
 
 #define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:HighpassPlugin"
+#define DISTRHO_PLUGIN_VST3_CATEGORIES "Fx|Filter|Mono"
+#define DISTRHO_PLUGIN_CLAP_FEATURES "audio-effect", "filter", "mono"
 
 #endif // DISTRHO_PLUGIN_INFO_H

@@ -6,16 +6,22 @@
 .kdev4/
 .DS_Store
 
+bin/*.clap
+bin-w32/*.clap
+bin-w64/*.clap
 bin/*-ladspa.so
 bin/*-ladspa.dylib
 bin-w32/*-ladspa.dll
 bin-w64/*-ladspa.dll
+bin/*.lv2/
+bin-w32/*.lv2/
+bin-w64/*.lv2/
 bin/*-vst.so
 bin/*-vst.dylib
 bin-w32/*-vst.dll
 bin-w64/*-vst.dll
-bin/*.lv2/
-bin-w32/*.lv2/
-bin-w64/*.lv2/
+bin/*.vst3/
+bin-w32/*.vst3/
+bin-w64/*.vst3/
 build/
 dist/
