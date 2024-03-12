@@ -124,12 +124,6 @@ FAUSTPP_BEGIN_NAMESPACE
 static float mydsp_faustpower4_f(float value) {
 	return value * value * value * value;
 }
-static float mydsp_faustpower3_f(float value) {
-	return value * value * value;
-}
-static float mydsp_faustpower2_f(float value) {
-	return value * value;
-}
 
 class mydsp : public dsp {
 	
@@ -142,19 +136,19 @@ class mydsp : public dsp {
 	float fRec5[2];
 	float fConst3;
 	FAUSTFLOAT fHslider1;
+	float fRec0[2];
 	float fRec1[2];
 	float fRec2[2];
 	float fRec3[2];
-	float fRec4[2];
 	
  public:
 	mydsp() {}
 
 	void metadata(Meta* m) { 
-		m->declare("../../faust/moogladder.dsp/moogLadder:author", "Eric Tarr");
+		m->declare("../../faust/moogladder.dsp/moogLadder:author", "Dario Sanfilippo");
 		m->declare("../../faust/moogladder.dsp/moogLadder:license", "MIT-style STK-4.3 license");
 		m->declare("author", "Christopher Arndt");
-		m->declare("compile_options", "-a /home/chris/tmp/tmpgg1sjcmc.cpp -lang cpp -ct 1 -es 1 -mcd 16 -mdd 1024 -mdy 33 -single -ftz 0");
+		m->declare("compile_options", "-a /home/chris/tmp/tmp167hicyk.cpp -lang cpp -ct 1 -es 1 -mcd 16 -mdd 1024 -mdy 33 -single -ftz 0");
 		m->declare("description", "FAUST Moog Ladder 24 dB LPF");
 		m->declare("filename", "moogladder.dsp");
 		m->declare("license", "MIT-style STK-4.3 license");
@@ -198,16 +192,16 @@ class mydsp : public dsp {
 			fRec5[l0] = 0.0f;
 		}
 		for (int l1 = 0; l1 < 2; l1 = l1 + 1) {
-			fRec1[l1] = 0.0f;
+			fRec0[l1] = 0.0f;
 		}
 		for (int l2 = 0; l2 < 2; l2 = l2 + 1) {
-			fRec2[l2] = 0.0f;
+			fRec1[l2] = 0.0f;
 		}
 		for (int l3 = 0; l3 < 2; l3 = l3 + 1) {
-			fRec3[l3] = 0.0f;
+			fRec2[l3] = 0.0f;
 		}
 		for (int l4 = 0; l4 < 2; l4 = l4 + 1) {
-			fRec4[l4] = 0.0f;
+			fRec3[l4] = 0.0f;
 		}
 	}
 	
@@ -251,27 +245,26 @@ class mydsp : public dsp {
 		FAUSTFLOAT* input0 = inputs[0];
 		FAUSTFLOAT* output0 = outputs[0];
 		float fSlow0 = fConst1 * float(fHslider0);
-		float fSlow1 = 0.041164123f * (float(fHslider1) + -0.707f);
+		float fSlow1 = 0.1646572f * (float(fHslider1) + -0.70710677f);
 		for (int i0 = 0; i0 < count; i0 = i0 + 1) {
 			fRec5[0] = fSlow0 + fConst2 * fRec5[1];
 			float fTemp0 = std::tan(fConst3 * fRec5[0]);
 			float fTemp1 = fTemp0 + 1.0f;
-			float fTemp2 = 3.9f - 0.9f * std::pow(-(0.33333334f * (1.0f - (std::log10(fRec5[0]) + -0.30103f))), 0.2f);
-			float fTemp3 = fTemp0 * ((float(input0[i0]) - fSlow1 * fTemp2 * (fRec1[1] + fRec2[1] * fTemp0 + mydsp_faustpower2_f(fTemp0) * fRec3[1] + mydsp_faustpower3_f(fTemp0) * fRec4[1])) / (fSlow1 * fTemp2 * mydsp_faustpower4_f(fTemp0) + 1.0f) - fRec4[1]) / fTemp1;
-			float fTemp4 = fTemp0 * (fRec4[1] + fTemp3 - fRec3[1]) / fTemp1;
-			float fTemp5 = fTemp0 * (fRec3[1] + fTemp4 - fRec2[1]) / fTemp1;
-			float fTemp6 = fTemp0 * (fRec2[1] + fTemp5 - fRec1[1]) / fTemp1;
-			float fRec0 = fRec1[1] + fTemp6;
-			fRec1[0] = fRec1[1] + 2.0f * fTemp6;
-			fRec2[0] = fRec2[1] + 2.0f * fTemp5;
-			fRec3[0] = fRec3[1] + 2.0f * fTemp4;
-			fRec4[0] = fRec4[1] + 2.0f * fTemp3;
-			output0[i0] = FAUSTFLOAT(fRec0);
+			float fTemp2 = fTemp0 * ((float(input0[i0]) - fSlow1 * (1.0f - fTemp0 / fTemp1) * (fRec3[1] + fTemp0 * (fRec2[1] + fTemp0 * (fRec1[1] + fTemp0 * fRec0[1] / fTemp1) / fTemp1) / fTemp1)) / (fSlow1 * (mydsp_faustpower4_f(fTemp0) / mydsp_faustpower4_f(fTemp1)) + 1.0f) - fRec0[1]) / fTemp1;
+			fRec0[0] = fRec0[1] + 2.0f * fTemp2;
+			float fTemp3 = fTemp0 * (fRec0[1] + fTemp2 - fRec1[1]) / fTemp1;
+			fRec1[0] = fRec1[1] + 2.0f * fTemp3;
+			float fTemp4 = fTemp0 * (fRec1[1] + fTemp3 - fRec2[1]) / fTemp1;
+			fRec2[0] = fRec2[1] + 2.0f * fTemp4;
+			float fTemp5 = fTemp0 * (fRec2[1] + fTemp4 - fRec3[1]) / fTemp1;
+			fRec3[0] = fRec3[1] + 2.0f * fTemp5;
+			float fRec4 = fRec3[1] + fTemp5;
+			output0[i0] = FAUSTFLOAT(fRec4);
 			fRec5[1] = fRec5[0];
+			fRec0[1] = fRec0[0];
 			fRec1[1] = fRec1[0];
 			fRec2[1] = fRec2[0];
 			fRec3[1] = fRec3[0];
-			fRec4[1] = fRec4[0];
 		}
 	}
 
