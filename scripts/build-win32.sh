@@ -14,7 +14,7 @@ fi
 set -e
 
 # Preparation
-_FLAGS="-DPTW32_STATIC_LIB -Werror"
+_FLAGS="-DPTW32_STATIC_LIB -Werror -fno-builtin-strstr"
 _ARCH=i686-w64-mingw32
 _PREFIX="/usr/${_ARCH}"
 export PATH=${_PREFIX}/bin:$PATH
