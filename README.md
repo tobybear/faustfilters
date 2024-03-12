@@ -12,7 +12,7 @@ otherwise. They all have two (automatable) parameters:
 * Cutoff / center frequency in Hertz (`20.0 - 20,000.0`)
 * Q factor (range varies)
 
-The plugins depends on the host to provide a generic UI to control parameters.
+The plugins depend on the host to provide a generic UI to control parameters.
 
 
 ### Diode Ladder
@@ -82,7 +82,7 @@ the following command:
     make install
 
 The makefiles support the usual `PREFIX` and `DESTDIR` variables to change the
-installation prefix and set an installation root directory (defaulty: empty).
+installation prefix and set an installation root directory (default: empty).
 `PREFIX` defaults to `/usr/local`, but on macOS and Windows it is not used,
 since the system-wide installation directories for plugins are fixed.
 
