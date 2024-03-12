@@ -43,6 +43,7 @@ if [[ -n "$PROJECT_VERSION" ]]; then
     CHECKOUT="$(pwd)"
     REPO_URL="$(git remote get-url origin)"
     PROJECT_NAME="${REPO_URL##*/}"
+    PROJECT_NAME="${PROJECT_NAME%.git}"
     SRCDIR="$PROJECT_NAME-${PROJECT_VERSION#v}"
     ZIP_NAME="$SRCDIR-win64.zip"
     mkdir -p dist
